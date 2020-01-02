@@ -1,12 +1,14 @@
-Debug = 0
+Debug = 1
 
-LDFLAGS = -lSDL2 -lpthread
+LDFLAGS = -lpthread
 CFLAGS = -Wall
-INC_DIR = $(shell pkg-config --cflags sdl2)
-EXEC = simple_cam
+INC_DIR = 
+EXEC = cap
 
 ifeq ($(Debug), 1)
-CFLAGS += -g -DDEBUG
+ CFLAGS += -O0 -g -DDEBUG
+else
+ CFLAGS += -O3 -g
 endif
 
 .PHONY = all clean
@@ -20,5 +22,4 @@ v4l2_driver.o:v4l2_driver.c
 	cc $(CFLAGS) -o $@ -c $^
 
 clean:
-	rm *.o
-	find -type f -executable -exec rm {} \;
+	rm *.o $(EXEC)

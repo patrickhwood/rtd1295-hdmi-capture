@@ -1,5 +1,4 @@
 #include "v4l2_driver.h"
-#include <SDL2/SDL.h>
 #include <linux/videodev2.h>
 #include <pthread.h>
 #include <stdio.h>
@@ -12,10 +11,9 @@
 #define SAVE_EVERY_FRAME 0
 
 pthread_t thread_stream;
-SDL_Window *sdlScreen;
-SDL_Renderer *sdlRenderer;
-SDL_Texture *sdlTexture;
-SDL_Rect sdlRect;
+void *sdlScreen;
+void *sdlRenderer;
+void *sdlTexture;
 
 /* miscellanous */
 int thread_exit_sig = 0;
@@ -26,58 +24,21 @@ struct streamHandler {
 };
 
 void print_help() {
-  printf("Usage: simple_cam <width> <height> <device>\n");
-  printf("Example: simple_cam 640 480 /dev/video0\n");
+  printf("Usage: cap <width> <height> <device>\n");
+  printf("Example: cap 640 480 /dev/video0\n");
 }
 
 static void frame_handler(void *pframe, int length) {
-  SDL_UpdateTexture(sdlTexture, &sdlRect, pframe, IMAGE_WIDTH * 2);
-  //  SDL_UpdateYUVTexture
-  SDL_RenderClear(sdlRenderer);
-  SDL_RenderCopy(sdlRenderer, sdlTexture, NULL, &sdlRect);
-  SDL_RenderPresent(sdlRenderer);
-
-#if SAVE_EVERY_FRAME
-  static yuv_index = 0;
+  static int yuv_index = 0;
   char yuvifle[100];
   sprintf(yuvifle, "yuv-%d.yuv", yuv_index);
   FILE *fp = fopen(yuvifle, "wb");
   fwrite(pframe, length, 1, fp);
   fclose(fp);
   yuv_index++;
-#endif
 }
 
 static void *v4l2_streaming(void *arg) {
-  // SDL2 begins
-  memset(&sdlRect, 0, sizeof(sdlRect));
-  if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER)) {
-    printf("Could not initialize SDL - %s\n", SDL_GetError());
-    return NULL;
-  }
-
-  sdlScreen = SDL_CreateWindow("Simple YUV Window", SDL_WINDOWPOS_UNDEFINED,
-                               SDL_WINDOWPOS_UNDEFINED, IMAGE_WIDTH,
-                               IMAGE_HEIGHT, SDL_WINDOW_SHOWN);
-
-  if (!sdlScreen) {
-    fprintf(stderr, "SDL: could not create window - exiting:%s\n",
-            SDL_GetError());
-    return NULL;
-  }
-
-  sdlRenderer = SDL_CreateRenderer(
-      sdlScreen, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-  if (sdlRenderer == NULL) {
-    fprintf(stderr, "SDL_CreateRenderer Error\n");
-    return NULL;
-  }
-  sdlTexture =
-      SDL_CreateTexture(sdlRenderer, SDL_PIXELFORMAT_YUY2,
-                        SDL_TEXTUREACCESS_STREAMING, IMAGE_WIDTH, IMAGE_HEIGHT);
-  sdlRect.w = IMAGE_WIDTH;
-  sdlRect.h = IMAGE_HEIGHT;
-
   int fd = ((struct streamHandler *)(arg))->fd;
   void (*handler)(void *pframe, int length) =
       ((struct streamHandler *)(arg))->framehandler;
@@ -186,21 +147,7 @@ int main(int argc, char const *argv[]) {
     fprintf(stderr, "create thread failed\n");
     goto exit_;
   }
-
-  int quit = 0;
-  SDL_Event e;
-  while (!quit) {
-    while (SDL_PollEvent(&e)) {
-      if (e.type == SDL_QUIT) { // click close icon then quit
-        quit = 1;
-      }
-      if (e.type == SDL_KEYDOWN) {
-        if (e.key.keysym.sym == SDLK_ESCAPE) // press ESC the quit
-          quit = 1;
-      }
-    }
-    usleep(25);
-  }
+  sleep(1);
 
   thread_exit_sig = 1;               // exit thread_stream
   pthread_join(thread_stream, NULL); // wait for thread_stream exiting
@@ -219,6 +166,5 @@ exit_:
   if (v4l2_close(video_fildes) == -1) {
     perror("v4l2_close");
   };
-  SDL_Quit();
   return 0;
 }
