@@ -13,8 +13,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-int IMAGE_WIDTH = 640;
-int IMAGE_HEIGHT = 480;
+int IMAGE_WIDTH = 1280;
+int IMAGE_HEIGHT = 720;
 struct v4l2_ubuffer *v4l2_ubuffers;
 
 int v4l2_open(const char *device) {
@@ -59,9 +59,9 @@ int v4l2_querycap(int fd, const char *device) {
   struct v4l2_fmtdesc fmtdesc;
   fmtdesc.index = 0;
   fmtdesc.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-  printf("\033[31mSupport format:\n\033[0m");
+  printf("Support format:\n");
   while (ioctl(fd, VIDIOC_ENUM_FMT, &fmtdesc) != -1) {
-    printf("\033[31m\t%d.%s\n\033[0m", fmtdesc.index + 1, fmtdesc.description);
+    printf("\t%d.%s\n", fmtdesc.index + 1, fmtdesc.description);
     fmtdesc.index++;
   }
   return 0;
@@ -92,10 +92,7 @@ int v4l2_gfmt(int fd) {
     fprintf(stderr, "Unable to get format\n");
     return -1;
   }
-  printf("\033[33mpix.pixelformat:\t%c%c%c%c\n\033[0m",
-         fmt.fmt.pix.pixelformat & 0xFF, (fmt.fmt.pix.pixelformat >> 8) & 0xFF,
-         (fmt.fmt.pix.pixelformat >> 16) & 0xFF,
-         (fmt.fmt.pix.pixelformat >> 24) & 0xFF);
+  printf("pix.pixelformat:\t%x\n", fmt.fmt.pix.pixelformat);
   printf("pix.height:\t\t%d\n", fmt.fmt.pix.height);
   printf("pix.width:\t\t%d\n", fmt.fmt.pix.width);
   printf("pix.field:\t\t%d\n", fmt.fmt.pix.field);
@@ -155,13 +152,13 @@ int v4l2_mmap(int fd) {
 #endif
     /**
       *  output:
-      *  buffer offset:0	length:614400
-      *  buffer offset:614400	length:614400
-      *  buffer offset:1228800	length:614400
-      *  buffer offset:1843200	length:614400
+      *    buffer offset:0	length:3686400
+      *    buffer offset:3686400	length:3686400
+      *    buffer offset:7372800	length:3686400
+      *    buffer offset:11059200	length:3686400
       *
-      *  explanation：saved in YUV422 format，a pixel needs 2 byte storage in
-      *  average，as our image size is 640*480. 640*480*2=614400
+      *  explanation：saved in ARGB format，a pixel needs 4 byte storage
+      *  as our image size is 1280*720. 1280*720*4=3686400
     */
     if (v4l2_ubuffers[n_buffers].start == MAP_FAILED) {
       fprintf(stderr, "buffer map error %u\n", n_buffers);

@@ -25,17 +25,17 @@ struct streamHandler {
 
 void print_help() {
   printf("Usage: cap <width> <height> <device>\n");
-  printf("Example: cap 640 480 /dev/video0\n");
+  printf("Example: cap 1280 720 /dev/video0\n");
 }
 
 static void frame_handler(void *pframe, int length) {
-  static int yuv_index = 0;
-  char yuvifle[100];
-  sprintf(yuvifle, "yuv-%d.yuv", yuv_index);
-  FILE *fp = fopen(yuvifle, "wb");
+  static int file_index = 0;
+  char rgbfile[100];
+  sprintf(rgbfile, "rgb-%d.data", file_index);
+  FILE *fp = fopen(rgbfile, "wb");
   fwrite(pframe, length, 1, fp);
   fclose(fp);
-  yuv_index++;
+  file_index++;
 }
 
 static void *v4l2_streaming(void *arg) {
@@ -116,8 +116,7 @@ int main(int argc, char const *argv[]) {
     goto exit_;
   }
 
-  // most of devices support YUYV422 packed.
-  if (v4l2_sfmt(video_fildes, V4L2_PIX_FMT_YUYV) == -1) {
+  if (v4l2_sfmt(video_fildes, V4L2_PIX_FMT_BGR32) == -1) {
     perror("v4l2_sfmt");
     goto exit_;
   }
@@ -147,7 +146,7 @@ int main(int argc, char const *argv[]) {
     fprintf(stderr, "create thread failed\n");
     goto exit_;
   }
-  sleep(1);
+  usleep(200000);
 
   thread_exit_sig = 1;               // exit thread_stream
   pthread_join(thread_stream, NULL); // wait for thread_stream exiting
