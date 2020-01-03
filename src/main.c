@@ -23,9 +23,9 @@ struct streamHandler {
   void (*framehandler)(void *pframe, int length);
 };
 
-void print_help() {
-  printf("Usage: cap <width> <height> <device>\n");
-  printf("Example: cap 1280 720 /dev/video0\n");
+void print_help(const char *cmd) {
+  printf("Usage: %s <width> <height> <device>\n", cmd);
+  printf("Example: %s 1920 1080 /dev/video0\n", cmd);
 }
 
 static void frame_handler(void *pframe, int length) {
@@ -92,7 +92,7 @@ int main(int argc, char const *argv[]) {
   const char *device = "/dev/video0";
 
   if (argc == 2 && (strchr(argv[1], 'h') != NULL)) {
-    print_help();
+    print_help(argv[0]);
     exit(0);
   }
 
@@ -146,7 +146,7 @@ int main(int argc, char const *argv[]) {
     fprintf(stderr, "create thread failed\n");
     goto exit_;
   }
-  usleep(200000);
+  sleep(1);
 
   thread_exit_sig = 1;               // exit thread_stream
   pthread_join(thread_stream, NULL); // wait for thread_stream exiting

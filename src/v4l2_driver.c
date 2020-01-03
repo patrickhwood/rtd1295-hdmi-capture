@@ -13,8 +13,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-int IMAGE_WIDTH = 1280;
-int IMAGE_HEIGHT = 720;
+int IMAGE_WIDTH = 1920;
+int IMAGE_HEIGHT = 1080;
 struct v4l2_ubuffer *v4l2_ubuffers;
 
 int v4l2_open(const char *device) {
@@ -152,13 +152,11 @@ int v4l2_mmap(int fd) {
 #endif
     /**
       *  output:
-      *    buffer offset:0	length:3686400
-      *    buffer offset:3686400	length:3686400
-      *    buffer offset:7372800	length:3686400
-      *    buffer offset:11059200	length:3686400
+      *    buffer offset:0	length:8294400
+      *    buffer offset:8294400	length:8294400
       *
-      *  explanation：saved in ARGB format，a pixel needs 4 byte storage
-      *  as our image size is 1280*720. 1280*720*4=3686400
+      *  explanation: saved in ARGB format，a pixel needs 4 bytes storage
+      *  as our image size is 1920*1080. 1920*1080*4=8294400
     */
     if (v4l2_ubuffers[n_buffers].start == MAP_FAILED) {
       fprintf(stderr, "buffer map error %u\n", n_buffers);

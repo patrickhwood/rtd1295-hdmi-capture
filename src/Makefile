@@ -3,7 +3,7 @@ Debug = 1
 LDFLAGS = -lpthread
 CFLAGS = -Wall
 INC_DIR = 
-EXEC = cap
+EXEC = capture
 
 ifeq ($(Debug), 1)
  CFLAGS += -O0 -g -DDEBUG
