@@ -1,14 +1,12 @@
-# Webcam-SDL2
-
-[![Build Status](https://travis-ci.org/chendotjs/Webcam-SDL2.svg?branch=master)](https://travis-ci.org/chendotjs/Webcam-SDL2)
+# HDMI capture
 
 ## Intro
 
-This is a simple example which illustrates how to capture video(or image if you like) using `v4l2` and to display with [SDL2](https://www.libsdl.org/).
+This is a simple example which illustrates how to capture HDMI video frames on a Realtek RTD1295 to disk using `v4l2`.
 
-Currently, most webcams supports `YUYV422` output format. So the default output format is set to `YUYV422`. You can modify the format parameter both for `v2lc` and `sdl2` to be compatible with your webcam.
+The output format is ABGR.
 
-To list support formats of your webcam, try following commands:
+To list the supported formats, try the following commands:
 ```bash
 v4l2-ctl --list-formats-ext
 ```
@@ -19,33 +17,20 @@ ffmpeg -f v4l2 -list_formats all -i /dev/video0
 
 ## Usage
 
-Both `Makefile` and `CMakeLists` are provided.
+Both `Makefile` and `CMakeLists` are provided (but only the Makefile has been tested).
 
 -   using `Makefile`
 ```bash
-git clone https://github.com/chendotjs/Webcam-SDL2
-cd Webcam-SDL2/src
-sudo apt-get install libsdl2-dev
+git clone https://github.com/patrickhwood/rtd1295-hdmi-capture
+cd rtd1295-hdmi-capture
 make
-./simple_cam 640 480 /dev/video0
+./capture	# defaults to 1920x1080
+./capture 1280 720
 ```
 
--   using `CMakeLists`
-```bash
-git clone https://github.com/chendotjs/Webcam-SDL2
-cd Webcam-SDL2/
-sudo apt-get install libsdl2-dev
-mkdir build && cd build
-cmake ../src
-make
-./simple_cam 640 480 /dev/video0
-```
-![](./capture-example.gif)
 
 ## References
 
 [fswebcam](https://github.com/fsphil/fswebcam)
 
 [CAPTURING A WEBCAM STREAM USING V4L2](https://jwhsmith.net/2014/12/capturing-a-webcam-stream-using-v4l2/)
-
-[最简单的视音频播放示例1：总述](http://blog.csdn.net/leixiaohua1020/article/details/40246783)
