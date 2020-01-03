@@ -4,7 +4,7 @@
 #include <inttypes.h>
 #include <pthread.h>
 
-#define BUF_NUM 4
+#define BUF_NUM 2
 
 extern int IMAGE_WIDTH;
 extern int IMAGE_HEIGHT;
